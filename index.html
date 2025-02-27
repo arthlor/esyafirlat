@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Throw Objects at Ekrem İmamoğlu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+      font-size: 32px;
+    }
+    
+    .game-container {
+      position: relative;
+      width: 450px;
+      height: 450px;
+      margin: 0 auto 20px auto;
+      border-radius: 15px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border: none;
+    }
+    
+    .game-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #8FBC8F 60%, #8FBC8F 100%);
+      z-index: 1;
+    }
+    
+    .target-image {
+      width: 220px;
+      height: 220px;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
+      transition: transform 0.2s ease;
+    }
+    
+    .target-image.hit {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-52%) rotate(-2deg); }
+      20%, 40%, 60%, 80% { transform: translateX(-48%) rotate(2deg); }
+    }
+    
+    .thrown-object {
+      position: absolute;
+      z-index: 10;
+      filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+      transition: all 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 450px;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    #throwButton {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      width: 100%;
+      max-width: 250px;
+      font-size: 18px;
+      padding: 15px 25px;
+    }
+    
+    #throwButton:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(0,0,0,0.25);
+      background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
+    }
+    
+    #throwButton:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+    
+    .category-button {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    }
+    
+    .category-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    
+    .category-button.active {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+    
+    .score-display {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .object-explosion {
+      position: absolute;
+      font-size: 25px;
+      z-index: 5;
+      animation: explode 0.5s forwards;
+    }
+    
+    @keyframes explode {
+      0% {
+        transform: scale(0.5);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+    
+    .flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      opacity: 0;
+      z-index: 15;
+      pointer-events: none;
+    }
+    
+    .flash.active {
+      animation: flash-animation 0.3s forwards;
+    }
+    
+    @keyframes flash-animation {
+      0% { opacity: 0.7; }
+      100% { opacity: 0; }
+    }
+    
+    .rain-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+    }
+    
+    .raindrop {
+      position: absolute;
+      width: 2px;
+      background-color: rgba(255, 255, 255, 0.6);
+      z-index: 3;
+      animation: rain linear infinite;
+    }
+    
+    @keyframes rain {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(1000%); }
+    }
+    
+    .volume-control {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 20;
+      color: #2c3e50;
+      background-color: rgba(255, 255, 255, 0.7);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .footer {
+      margin-top: 15px;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 500px) {
+      .game-container {
+        width: 90vw;
+        height: 90vw;
+      }
+      
+      .target-image {
+        width: 45vw;
+        height: 45vw;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .button-row {
+        gap: 5px;
+      }
+      
+      .category-button {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Ekrem İmamoğlu'na Eşya Fırlat</h1>
+  
+  <div class="game-container" id="gameContainer">
+    <div class="game-background"></div>
+    <div class="rain-effect" id="rainEffect"></div>
+    <!-- Placeholder for the cartoon image -->
+    <img src="/api/placeholder/220/220" alt="Ekrem İmamoğlu Cartoon" class="target-image" id="targetImage">
+    <div class="flash" id="flashEffect"></div>
+    <div class="volume-control" id="volumeToggle">🔊</div>
+  </div>
+  
+  <div class="controls">
+    <div class="button-row">
+      <button class="category-button active" data-category="all">Hepsi</button>
+      <button class="category-button" data-category="food">Yiyecek</button>
+      <button class="category-button" data-category="nature">Doğa</button>
+      <button class="category-button" data-category="objects">Eşyalar</button>
+      <button class="category-button" data-category="politics">Politika</button>
+    </div>
+    
+    <button id="throwButton">Rastgele Eşya Fırlat</button>
+    
+    <div class="score-display">
+      <span>Fırlatılan: <span id="scoreCount">0</span></span>
+      <span>İsabet: <span id="hitCount">0</span></span>
+    </div>
+  </div>
+  
+  <div class="footer">Farklı kategorilerden eşyalar fırlatmak için butona tıkla!</div>
+  
+  <script>
+    // List of objects that can be thrown, organized by category
+    const objectsByCategory = {
+      food: [
+        { name: "tomato", emoji: "🍅", size: 40, effect: "splat" },
+        { name: "egg", emoji: "🥚", size: 35, effect: "crack" },
+        { name: "pie", emoji: "🥧", size: 45, effect: "splat" },
+        { name: "cookie", emoji: "🍪", size: 35, effect: "break" },
+        { name: "pizza", emoji: "🍕", size: 45, effect: "splat" },
+        { name: "taco", emoji: "🌮", size: 40, effect: "break" },
+        { name: "cucumber", emoji: "🥒", size: 40, effect: "bounce" },
+        { name: "carrot", emoji: "🥕", size: 38, effect: "bounce" },
+        { name: "ice cream", emoji: "🍦", size: 42, effect: "splat" },
+        { name: "cake", emoji: "🎂", size: 45, effect: "splat" }
+      ],
+      nature: [
+        { name: "flower", emoji: "🌹", size: 40, effect: "float" },
+        { name: "water balloon", emoji: "💧", size: 40, effect: "splash" },
+        { name: "snowball", emoji: "❄️", size: 35, effect: "splash" },
+        { name: "leaf", emoji: "🍃", size: 40, effect: "float" },
+        { name: "rock", emoji: "🪨", size: 45, effect: "bounce" },
+        { name: "fire", emoji: "🔥", size: 40, effect: "burn" },
+        { name: "rain", emoji: "🌧️", size: 45, effect: "weather" },
+        { name: "cloud", emoji: "☁️", size: 50, effect: "float" },
+        { name: "maple leaf", emoji: "🍁", size: 40, effect: "float" },
+        { name: "lightning", emoji: "⚡", size: 40, effect: "flash" }
+      ],
+      objects: [
+        { name: "shoe", emoji: "👟", size: 50, effect: "bounce" },
+        { name: "hat", emoji: "🧢", size: 45, effect: "bounce" },
+        { name: "coin", emoji: "🪙", size: 30, effect: "spin" },
+        { name: "basketball", emoji: "🏀", size: 50, effect: "bounce" },
+        { name: "paper", emoji: "📄", size: 45, effect: "float" },
+        { name: "microphone", emoji: "🎤", size: 40, effect: "bounce" },
+        { name: "book", emoji: "📕", size: 45, effect: "bounce" },
+        { name: "sock", emoji: "🧦", size: 40, effect: "float" },
+        { name: "keyboard", emoji: "⌨️", size: 50, effect: "break" },
+        { name: "toilet paper", emoji: "🧻", size: 45, effect: "float" },
+        { name: "football", emoji: "⚽", size: 45, effect: "bounce" },
+        { name: "boxing glove", emoji: "🥊", size: 40, effect: "bounce" }
+      ],
+      politics: [
+        { name: "vote", emoji: "🗳️", size: 45, effect: "break" },
+        { name: "megaphone", emoji: "📢", size: 45, effect: "noise" },
+        { name: "newspaper", emoji: "📰", size: 50, effect: "float" },
+        { name: "flag", emoji: "🏁", size: 45, effect: "float" },
+        { name: "microphone", emoji: "🎙️", size: 35, effect: "bounce" },
+        { name: "document", emoji: "📜", size: 40, effect: "float" },
+        { name: "briefcase", emoji: "💼", size: 45, effect: "bounce" },
+        { name: "money bag", emoji: "💰", size: 45, effect: "coin" }
+      ]
+    };
+    
+    // Combine all objects for the "all" category
+    const allObjects = [
+      ...objectsByCategory.food,
+      ...objectsByCategory.nature,
+      ...objectsByCategory.objects,
+      ...objectsByCategory.politics
+    ];
+    
+    // Sound effects
+    const sounds = {
+      throw: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
+      hit: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
+      splash: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
+      bounce: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
+      break: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw==")
+    };
+    
+    // Weather effect particles
+    const weatherEffects = {
+      rain: {
+        create: () => {
+          const rainEffect = document.getElementById('rainEffect');
+          rainEffect.innerHTML = '';
+          
+          for (let i = 0; i < 50; i++) {
+            const raindrop = document.createElement('div');
+            raindrop.className = 'raindrop';
+            raindrop.style.left = `${Math.random() * 100}%`;
+            raindrop.style.top = `-${Math.random() * 100}%`;
+            raindrop.style.height = `${5 + Math.random() * 15}px`;
+            raindrop.style.animationDuration = `${0.5 + Math.random() * 0.7}s`;
+            rainEffect.appendChild(raindrop);
+          }
+          
+          setTimeout(() => {
+            rainEffect.innerHTML = '';
+          }, 3000);
+        }
+      }
+    };
+    
+    // Get DOM elements
+    const gameContainer = document.getElementById('gameContainer');
+    const throwButton = document.getElementById('throwButton');
+    const scoreCount = document.getElementById('scoreCount');
+    const hitCount = document.getElementById('hitCount');
+    const targetImage = document.getElementById('targetImage');
+    const flashEffect = document.getElementById('flashEffect');
+    const volumeToggle = document.getElementById('volumeToggle');
+    const categoryButtons = document.querySelectorAll('.category-button');
+    
+    // Variables
+    let score = 0;
+    let hits = 0;
+    let currentCategory = 'all';
+    let soundEnabled = true;
+    
+    // Initialize
+    function init() {
+      // Set up event listeners
+      throwButton.addEventListener('click', throwRandomObject);
+      volumeToggle.addEventListener('click', toggleSound);
+      
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          setCategory(button.dataset.category);
+          
+          // Update active button style
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+        });
+      });
+    }
+    
+    // Toggle sound
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      volumeToggle.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+    
+    // Set current object category
+    function setCategory(category) {
+      currentCategory = category;
+    }
+    
+    // Play sound if enabled
+    function playSound(soundName) {
+      if (soundEnabled) {
+        const sound = sounds[soundName] || sounds.hit;
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Sound play error:", e));
+      }
+    }
+    
+    // Get random object based on current category
+    function getRandomObject() {
+      const objects = currentCategory === 'all' ? 
+        allObjects : objectsByCategory[currentCategory];
+      return objects[Math.floor(Math.random() * objects.length)];
+    }
+    
+    // Create flash effect
+    function createFlashEffect() {
+      flashEffect.classList.add('active');
+      setTimeout(() => {
+        flashEffect.classList.remove('active');
+      }, 300);
+    }
+    
+    // Throw a random object
+    function throwRandomObject() {
+      // Increase score
+      score++;
+      scoreCount.textContent = score;
+      
+      // Get a random object
+      const randomObject = getRandomObject();
+      
+      // Play throw sound
+      playSound('throw');
+      
+      // Create the object element
+      const objectElement = document.createElement('div');
+      objectElement.className = 'thrown-object';
+      objectElement.style.fontSize = `${randomObject.size}px`;
+      objectElement.textContent = randomObject.emoji;
+      objectElement.dataset.effect = randomObject.effect;
+      
+      // Set initial position (top of the container, random x position)
+      const startX = Math.random() * (gameContainer.offsetWidth - 50);
+      objectElement.style.top = '-50px';
+      objectElement.style.left = `${startX}px`;
+      
+      // Add to container
+      gameContainer.appendChild(objectElement);
+      
+      // Add button press effect
+      throwButton.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        throwButton.style.transform = '';
+      }, 100);
+      
+      // Flash effect for lightning
+      if (randomObject.effect === 'flash') {
+        setTimeout(createFlashEffect, 300);
+      }
+      
+      // Weather effect
+      if (randomObject.effect === 'weather') {
+        weatherEffects.rain.create();
+      }
+      
+      // Animate the throw
+      setTimeout(() => {
+        // Calculate where to land (near the target image)
+        const targetRect = targetImage.getBoundingClientRect();
+        const containerRect = gameContainer.getBoundingClientRect();
+        
+        const targetX = targetRect.left - containerRect.left + Math.random() * targetRect.width * 0.8;
+        const targetY = targetRect.top - containerRect.top + Math.random() * (targetRect.height / 2);
+        
+        // Add different animation based on object type
+        switch(randomObject.effect) {
+          case 'float':
+            objectElement.style.transition = 'all 1s cubic-bezier(0.2, 0.8, 0.3, 1)';
+            break;
+          case 'spin':
+            objectElement.style.transition = 'all 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+            objectElement.style.animation = 'spin 0.5s linear infinite';
+            break;
+          case 'bounce':
+            objectElement.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            break;
+          default:
+            objectElement.style.transition = 'all 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+        }
+        
+        // Move the object
+        objectElement.style.top = `${targetY}px`;
+        objectElement.style.left = `${targetX}px`;
+
+        // Check for hit after animation
+        setTimeout(() => {
+          // Calculate collision
+          const objectRect = objectElement.getBoundingClientRect();
+          const targetRect = targetImage.getBoundingClientRect();
+          
+          if (objectRect.left < targetRect.right &&
+              objectRect.right > targetRect.left &&
+              objectRect.top < targetRect.bottom &&
+              objectRect.bottom > targetRect.top) {
+            // Hit detected
+            hits++;
+            hitCount.textContent = hits;
+            targetImage.classList.add('hit');
+            playSound('hit');
+            
+            // Create explosion effect
+            const explosion = document.createElement('div');
+            explosion.className = 'object-explosion';
+            explosion.textContent = randomObject.emoji;
+            explosion.style.left = `${targetX}px`;
+            explosion.style.top = `${targetY}px`;
+            gameContainer.appendChild(explosion);
+            
+            // Remove explosion after animation
+            setTimeout(() => {
+              explosion.remove();
+            }, 500);
+            
+            // Remove hit class after animation
+            setTimeout(() => {
+              targetImage.classList.remove('hit');
+            }, 500);
+          }
+          
+          // Remove object after animation
+          setTimeout(() => {
+            objectElement.remove();
+          }, 1000);
+        }, 500);
+      }, 0);
+    }
+
+    // Start the game
+    init();
+  </script>
+</body>
+</html>
