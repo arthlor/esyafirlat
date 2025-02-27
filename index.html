@@ -54,7 +54,7 @@
     }
     
     .target-image {
-      width: 220px;
+      width: auto;
       height: 220px;
       position: absolute;
       bottom: 20px;
@@ -63,7 +63,8 @@
       z-index: 2;
       filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
       transition: transform 0.2s ease;
-      cursor: pointer;
+      object-fit: contain;
+      max-width: 100%;
     }
     
     .target-image:hover {
@@ -259,16 +260,42 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     
+    .target-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 2;
+    }
+    
     /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .target-image {
+        height: 200px;
+      }
+      
+      .target-container {
+        height: 220px;
+      }
+    }
+
     @media (max-width: 500px) {
+      .target-image {
+        height: 180px;
+        bottom: 10px;
+      }
+      
+      .target-container {
+        height: 180px;
+      }
+      
       .game-container {
         width: 90vw;
         height: 90vw;
-      }
-      
-      .target-image {
-        width: 45vw;
-        height: 45vw;
       }
       
       h1 {
@@ -292,7 +319,9 @@
   <div class="game-container" id="gameContainer">
     <div class="game-background"></div>
     <div class="rain-effect" id="rainEffect"></div>
-    <img src="./assets/ekrem-imamoglu.png" alt="Ekrem İmamoğlu" class="target-image" id="targetImage">
+    <div class="target-container">
+      <img src="./assets/ekrem-imamoglu.png" alt="Ekrem İmamoğlu" class="target-image" id="targetImage">
+    </div>
     <div class="flash" id="flashEffect"></div>
     <div class="volume-control" id="volumeToggle">🔊</div>
   </div>
@@ -337,7 +366,7 @@
       ],
       nature: [
         { name: "flower", emoji: "🌹", size: 40, effect: "float" },
-        { name: "water balloon", emoji: "💧", size: 40, effect: "splash" },
+        { name: "water balloon", emoji: "��", size: 40, effect: "splash" },
         { name: "snowball", emoji: "❄️", size: 35, effect: "splash" },
         { name: "leaf", emoji: "🍃", size: 40, effect: "float" },
         { name: "rock", emoji: "🪨", size: 45, effect: "bounce" },
