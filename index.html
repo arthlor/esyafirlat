@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Throw Objects at Ekrem İmamoğlu</title>
+  <title>Ekrem İmamoğlu'na Eşya Fırlat</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -292,15 +292,15 @@
   <div class="game-container" id="gameContainer">
     <div class="game-background"></div>
     <div class="rain-effect" id="rainEffect"></div>
-    <img src="ekrem-imamoglu.png" alt="Ekrem İmamoğlu" class="target-image" id="targetImage">
+    <img src="./assets/ekrem-imamoglu.png" alt="Ekrem İmamoğlu" class="target-image" id="targetImage">
     <div class="flash" id="flashEffect"></div>
     <div class="volume-control" id="volumeToggle">🔊</div>
   </div>
   
   <div class="controls">
     <div class="stats">
-      <div>Time Left: <span id="timer">60</span></div>
-      <div>High Score: <span id="highScore">0</span></div>
+      <div>Kalan Süre: <span id="timer">60</span></div>
+      <div>En Yüksek Skor: <span id="highScore">0</span></div>
     </div>
     <div class="button-row">
       <button class="category-button active" data-category="all">Hepsi</button>
@@ -383,11 +383,11 @@
     
     // Sound effects
     const sounds = {
-      throw: new Audio('sounds/throw.mp3'),
-      hit: new Audio('sounds/hit.mp3'),
-      splash: new Audio('sounds/splash.mp3'),
-      bounce: new Audio('sounds/bounce.mp3'),
-      break: new Audio('sounds/break.mp3')
+      throw: new Audio('./assets/sounds/throw.mp3'),
+      hit: new Audio('./assets/sounds/hit.mp3'),
+      splash: new Audio('./assets/sounds/splash.mp3'),
+      bounce: new Audio('./assets/sounds/bounce.mp3'),
+      break: new Audio('./assets/sounds/break.mp3')
     };
     
     // Weather effect particles
