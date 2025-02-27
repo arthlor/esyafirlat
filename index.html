@@ -45,6 +45,12 @@
       height: 100%;
       background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #8FBC8F 60%, #8FBC8F 100%);
       z-index: 1;
+      animation: skyAnimation 10s infinite alternate;
+    }
+    
+    @keyframes skyAnimation {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
     }
     
     .target-image {
@@ -57,6 +63,11 @@
       z-index: 2;
       filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
       transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .target-image:hover {
+      transform: translateX(-50%) scale(1.1);
     }
     
     .target-image.hit {
@@ -232,6 +243,22 @@
       font-size: 14px;
     }
     
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    
+    .stats div {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 15px;
+      border-radius: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 500px) {
       .game-container {
@@ -271,6 +298,10 @@
   </div>
   
   <div class="controls">
+    <div class="stats">
+      <div>Time Left: <span id="timer">60</span></div>
+      <div>High Score: <span id="highScore">0</span></div>
+    </div>
     <div class="button-row">
       <button class="category-button active" data-category="all">Hepsi</button>
       <button class="category-button" data-category="food">Yiyecek</button>
@@ -352,11 +383,11 @@
     
     // Sound effects
     const sounds = {
-      throw: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
-      hit: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
-      splash: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
-      bounce: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw=="),
-      break: new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vm//Lm//GbZuDtj4YeLw3w8y8IBFcG9f9dgobm1vr///Wkwff4Fh/+/W/R/+KmvAX4AH/Cd/+KdvwH8D/wH/Af4D/gP+A/4D/AP+A/wD/gPw==")
+      throw: new Audio('sounds/throw.mp3'),
+      hit: new Audio('sounds/hit.mp3'),
+      splash: new Audio('sounds/splash.mp3'),
+      bounce: new Audio('sounds/bounce.mp3'),
+      break: new Audio('sounds/break.mp3')
     };
     
     // Weather effect particles
@@ -398,6 +429,9 @@
     let hits = 0;
     let currentCategory = 'all';
     let soundEnabled = true;
+    let gameActive = true;
+    let timeLeft = 60;
+    let highScore = 0;
     
     // Initialize
     function init() {
@@ -414,6 +448,9 @@
           button.classList.add('active');
         });
       });
+      
+      startTimer();
+      loadHighScore();
     }
     
     // Toggle sound
@@ -564,6 +601,36 @@
           }, 1000);
         }, 500);
       }, 0);
+    }
+
+    function startTimer() {
+      const timer = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          document.getElementById('timer').textContent = timeLeft;
+        } else {
+          gameActive = false;
+          clearInterval(timer);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      if (hits > highScore) {
+        highScore = hits;
+        saveHighScore();
+      }
+      alert(`Game Over! Your score: ${hits}\nHigh Score: ${highScore}`);
+    }
+
+    function saveHighScore() {
+      localStorage.setItem('highScore', highScore);
+    }
+
+    function loadHighScore() {
+      highScore = localStorage.getItem('highScore') || 0;
+      document.getElementById('highScore').textContent = highScore;
     }
 
     // Start the game
